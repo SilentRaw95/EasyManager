@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Easy Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="css/base.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  </head>
+
+  <body>
+    <div class="contenedor espacio">
+      <form method="post" action="/addProduct">
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="name">Nombre:</label>
+            <input id="name" name="name" class="form-control" type="text">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="price">Precio:</label>
+            <input id="price" name="price" class="form-control" type="number" min="1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="stock">Stock:</label>
+            <input id="stock" name="stock" class="form-control" type="number" min="1">
+          </div>
+        </div>
+        <!-- Boton -->
+        <div class="form-group">
+          <input class="btn btn-primary col-md-12" type="submit" value="Crear">
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

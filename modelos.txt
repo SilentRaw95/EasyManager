@@ -1,0 +1,45 @@
+usuarios
+{
+    _id: ObjectId
+    first_name: String,
+    last_name: String,
+    username: String,
+    password: String(Encriptado),
+    role: String
+}
+
+productos
+{
+    _id: ObjectId
+    name: String,
+    stock: Integer,
+    price: Integer,
+    categories: [String]
+}
+
+modificaciones
+{
+    _id: ObjectId
+    date: Date,
+    product_id: ObjectId,
+    action: String,
+    modification: {
+        price: Integer,
+        stock: Integer,
+        categories: [String]
+    }
+}
+
+ventas
+{
+    _id: ObjectId
+    date: Date,
+    total: Integer,
+    productos: [{
+        product_id: ObjectId,
+        name: String,
+        quantity: Integer,
+        price: Integer
+        subtotal: Integer
+    }]
+}
