@@ -40,9 +40,34 @@
           <input class="btn btn-primary col-md-12" type="submit" value="Crear">
         </div>
       </form>
-    </div>
-    <div>
+
       <!-- tabla de datos -->
+      <table class="table espacio">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Producto</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">Categorias</th>
+            <th scope="col"></th>
+          </tr>
+        <thead>
+        <tbody>
+          <% products.forEach(function(item){ %>
+            <tr>
+              <th scope='row'><%= item.name %></th>
+              <th scope='row'><%= item.price %></th>
+              <th scope='row'><%= item.categories %></th>
+              <th scope='row'>
+                <% item.categories.forEach(function(data){ %>
+                  <%= data %>
+                <% }) %>
+              </th>
+              <th scope='row'></th>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
     </div>
   </body>
 </html>

@@ -56,7 +56,10 @@ mongo.connect(url, {
 
   // add product
   app.get("/addProduct", (req, res) => {
-    res.sendFile(__dirname + "/views/addProduct.html");
+    const collection = db.collection('products')
+    collection.find({}).toArray((err, products) => {
+      res.render(__dirname + "/views/addProduct.ejs", {products})
+    })
   });
 
   // apis
