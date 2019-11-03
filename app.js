@@ -12,66 +12,90 @@ var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost:27017/easy-manager");
 
-// schemas
-var userSchema = new mongoose.Schema({
-  first_name: String,
-  last_name: String,
-  username: String,
-  password: String,
-  role: String
-});
-var UserDB = mongoose.model("user", userSchema);
+const mongo = require('mongodb').MongoClient
+const url = 'mongodb://localhost:27017'
 
-var productSchema = new mongoose.Schema({
-  name: String,
-  stock: Number,
-  price: Number,
-  categories: [String]
-});
-var ProductDB = mongoose.model("products", productSchema);
+mongo.connect(url, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}, (err, client) => {
+  if (err) {
+    console.error(err)
+    return
+  }
+  const db = client.db('easy-manager')
 
-// rutas
-// pagina de inicio
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/views/index.html");
-});
+  // schemas
+  var userSchema = new mongoose.Schema({
+    first_name: String,
+    last_name: String,
+    username: String,
+    password: String,
+    role: String
+  });
+  var UserDB = mongoose.model("user", userSchema);
 
-// add user
-app.get("/addUser", (req, res) => {
-  res.sendFile(__dirname + "/views/addUser.html");
-});
+  var productSchema = new mongoose.Schema({
+    name: String,
+    stock: Number,
+    price: Number,
+    categories: [String]
+  });
+  var ProductDB = mongoose.model("products", productSchema);
 
-// add product
-app.get("/addProduct", (req, res) => {
-  res.sendFile(__dirname + "/views/addProduct.html");
-});
+  // rutas
+  // pagina de inicio
+  app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/views/index.html");
+  });
 
-// apis
-app.post("/addProduct", (req, res) => {
-  req.body.categories = req.body.categories.split(',')
+  // add user
+  app.get("/addUser", (req, res) => {
+    res.sendFile(__dirname + "/views/addUser.html");
+  });
 
-  var myData = new ProductDB(req.body);
-  myData.save()
-    .then(item => {
-      res.redirect("/addProduct")
+  // add product
+  app.get("/addProduct", (req, res) => {
+    res.sendFile(__dirname + "/views/addProduct.html");
+  });
+
+  // apis
+  app.post("/addProduct", (req, res) => {
+    req.body.categories = req.body.categories.split(',')
+
+    var myData = new ProductDB(req.body);
+    myData.save()
+      .then(item => {
+        res.redirect("/addProduct")
+      })
+      .catch(err => {
+        res.status(400).send("Unable to save to database");
+      });
+  });
+
+  app.post("/addUser", (req, res) => {
+    var myData = new UserDB(req.body);
+    myData.save()
+      .then(item => {
+        res.redirect("/addUser")
+      })
+      .catch(err => {
+        res.status(400).send("Unable to save to database");
+      });
+  });
+
+  app.post("/login", (req, res) => {
+    const collection = db.collection('users')
+    collection.findOne({name: req.body.username, password: req.body.password}, (err, item) => {
+      if(item){
+        res.redirect("/")
+      }
     })
-    .catch(err => {
-      res.status(400).send("Unable to save to database");
-    });
-});
+  });
 
-app.post("/addUser", (req, res) => {
-  var myData = new UserDB(req.body);
-  myData.save()
-    .then(item => {
-      res.redirect("/addUser")
-    })
-    .catch(err => {
-      res.status(400).send("Unable to save to database");
-    });
-});
-
-// logs
-app.listen(port, () => {
-  console.log("Server listening on port " + port);
-});
+  // logs
+  app.listen(port, () => {
+    console.log("Server listening on port " + port);
+  });
+  
+})
