@@ -55,10 +55,20 @@ mongo.connect(url, {
   });
 
   // add product
-  app.get("/addProduct", (req, res) => {
-    const collection = db.collection('products')
-    collection.find({}).toArray((err, products) => {
-      res.render(__dirname + "/views/addProduct.ejs", {products})
+  app.get("/addProduct/:saltar", (req, res) => {
+    // valores
+    let saltar = parseInt(req.params.saltar)
+
+    // obtener total
+    const total = db.collection('products')
+    total.find({}).toArray((err, numResults) => {
+      let totalResults = Math.ceil(numResults.length / 4)
+
+      // mostrar resultados
+      const collection = db.collection('products')
+      collection.find({}).skip(saltar).limit(4).toArray((err, products) => {
+        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults})
+      })
     })
   });
 
