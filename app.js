@@ -57,17 +57,20 @@ mongo.connect(url, {
   // add product (paginacion)
   app.get("/addProduct/:saltar", (req, res) => {
     // valores
+    let pagination = 5
     let saltar = parseInt(req.params.saltar)
+    let filtro1 = false
+    let filtro2 = false
 
     // obtener total
     const total = db.collection('products')
     total.find({}).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / 5)
+      let totalResults = Math.ceil(numResults.length / pagination)
 
       // mostrar resultados
       const collection = db.collection('products')
-      collection.find({}).skip(saltar).limit(5).toArray((err, products) => {
-        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults})
+      collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
+        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
       })
     })
   });
@@ -75,6 +78,7 @@ mongo.connect(url, {
   // add product (paginacion y filtros)
   app.get("/addProduct/:saltar/:nombre/:categoria", (req, res) => {
     // valores
+    let pagination = 5
     let saltar = parseInt(req.params.saltar)
     let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
     let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
@@ -85,15 +89,17 @@ mongo.connect(url, {
       name: {$regex: ".*" + nombre + ".*"},
       categories: [categoria]
     }).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / 5)
+      let totalResults = Math.ceil(numResults.length / pagination)
 
       // mostrar resultados
+      let filtro1 = String(req.params.nombre)
+      let filtro2 = String(req.params.categoria)
       const collection = db.collection('products')
       collection.find({
         name: {$regex: ".*" + nombre + ".*"},
         categories: [categoria]
-      }).skip(saltar).limit(5).toArray((err, products) => {
-        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults})
+      }).skip(saltar).limit(pagination).toArray((err, products) => {
+        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
       })
     })
   });

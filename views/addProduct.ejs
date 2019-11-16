@@ -91,7 +91,11 @@
       </table>
       <div class='pagination'>
         <% for(var i=0; i < totalResults; i++) { %>
-          <a href="../addProduct/<%= i %>"><%= i %></a>
+          <% if (filtro1 != false || filtro2 != false) { %>
+            <a href="../../../../addProduct/<%= i %>/<%= filtro1 %>/<%= filtro2 %>"><%= i %></a>
+          <% } else { %>
+            <a href="../../addProduct/<%= i %>"><%= i %></a>
+          <% } %>
         <% } %>
       </div>
     </div>
