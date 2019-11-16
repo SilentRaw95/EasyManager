@@ -54,7 +54,7 @@ mongo.connect(url, {
     res.sendFile(__dirname + "/views/addUser.html");
   });
 
-  // add product
+  // add product (paginacion)
   app.get("/addProduct/:saltar", (req, res) => {
     // valores
     let saltar = parseInt(req.params.saltar)
@@ -62,11 +62,37 @@ mongo.connect(url, {
     // obtener total
     const total = db.collection('products')
     total.find({}).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / 4)
+      let totalResults = Math.ceil(numResults.length / 5)
 
       // mostrar resultados
       const collection = db.collection('products')
-      collection.find({}).skip(saltar).limit(4).toArray((err, products) => {
+      collection.find({}).skip(saltar).limit(5).toArray((err, products) => {
+        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults})
+      })
+    })
+  });
+
+  // add product (paginacion y filtros)
+  app.get("/addProduct/:saltar/:nombre/:categoria", (req, res) => {
+    // valores
+    let saltar = parseInt(req.params.saltar)
+    let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
+    let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
+
+    // obtener total
+    const total = db.collection('products')
+    total.find({
+      name: {$regex: ".*" + nombre + ".*"},
+      categories: [categoria]
+    }).toArray((err, numResults) => {
+      let totalResults = Math.ceil(numResults.length / 5)
+
+      // mostrar resultados
+      const collection = db.collection('products')
+      collection.find({
+        name: {$regex: ".*" + nombre + ".*"},
+        categories: [categoria]
+      }).skip(saltar).limit(5).toArray((err, products) => {
         res.render(__dirname + "/views/addProduct.ejs", {products, totalResults})
       })
     })

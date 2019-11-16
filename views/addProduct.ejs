@@ -4,6 +4,7 @@
     <title>Easy Manager</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="../css/base.css" rel="stylesheet" type="text/css">
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
@@ -43,11 +44,11 @@
       </form>
 
       <!--Busqueda-->
-      <form actions="" method="get">
+      <form>
         <div class="form-row">
           <div class="form-group col-md-4">
             <div class="input-group">
-              <input id="name" name="name" class="form-control" type="text" placeholder="Nombre">
+              <input id="nameproduct" name="nameproduct" class="form-control" type="text" placeholder="Nombre">
             </div>
           </div>
           <div class="form-group col-md-4">
@@ -56,7 +57,7 @@
             </div>
           </div>
           <div class="form-group col-md-4">
-            <input class="btn btn-primary col-md-12" type="submit" value="Busqueda">
+            <input class="btn btn-primary col-md-12" type="button" id="buscar" value="Busqueda">
           </div>
         </div>
       </form>
@@ -95,4 +96,27 @@
       </div>
     </div>
   </body>
+  <script>
+    $(document).ready(function(){
+
+      $("#buscar").click(function(){
+        let name = $("#nameproduct").val();
+        let categoria = $("#categoria").val();
+
+        if(name != '' && categoria == ''){
+          // solo nombre
+          window.location.href = 'http://localhost:3000/addProduct/0/'+name+'/null'
+        } else if(name == '' && categoria != ''){
+          // solo categoria
+          window.location.href = 'http://localhost:3000/addProduct/0/null/'+categoria
+        } else if(name != '' && categoria != '') {
+          // ambas
+          window.location.href = 'http://localhost:3000/addProduct/0/'+name+'/'+categoria
+        } else {
+          window.location.href = 'http://localhost:3000/addProduct/0/'
+        }
+      });
+    
+    });
+  </script>
 </html>
