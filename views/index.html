@@ -31,7 +31,7 @@
 
         $.post("http://localhost:3000/login/", {username, password}, function(data){
           if(data === 'success'){
-            window.location.href = 'http://localhost:3000/addProduct/0/'
+            window.location.href = 'http://localhost:3000/home'
           } else {
             alert("No concuerdan el usuario y contraseña")
           }

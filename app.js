@@ -56,6 +56,15 @@ mongo.connect(url, {
     res.sendFile(__dirname + "/views/index.html");
   });
 
+  // pagina de inicio (con session)
+  app.get("/home", (req, res) => {
+    if(req.session._id){
+      res.sendFile(__dirname + "/views/home.html");
+    } else {
+      res.redirect("/")
+    }
+  });
+
   // add user
   app.get("/addUser", (req, res) => {
     if(req.session._id){
@@ -125,15 +134,13 @@ mongo.connect(url, {
 
   // apis
   app.post("/addProduct", (req, res) => {
-    req.body.categories = req.body.categories.split(',')
-
     var myData = new ProductDB(req.body);
     myData.save()
       .then(item => {
-        res.redirect("/addProduct")
+        return res.end("success")
       })
       .catch(err => {
-        res.status(400).send("Unable to save to database");
+        return res.end("error")
       });
   });
 

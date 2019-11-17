@@ -13,7 +13,7 @@
   <body>
     <div class="contenedor espacio">
       <!-- Formulario -->
-      <form method="post" action="/addProduct">
+      <form>
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="name">Nombre:</label>
@@ -39,7 +39,7 @@
         </div>
         <!-- Boton -->
         <div class="form-group">
-          <input class="btn btn-primary col-md-12" type="submit" value="Crear">
+          <input class="btn btn-primary col-md-12" id="crear" type="button" value="Crear">
         </div>
       </form>
 
@@ -194,7 +194,28 @@
           }
         });
       });
-    
+
+      $("#crear").click(function(){
+        let name = $("#name").val();
+        let price = $("#price").val();
+        let stock = $("#stock").val();
+        let categories = $("#categories").val();
+
+        let fetch_data = {
+          name: name,
+          stock: stock,
+          price: price,
+          categories: categories.split(',')
+        }
+
+        $.post("http://localhost:3000/addProduct/", fetch_data, function(data){
+          if(data === 'success'){
+            location.reload()
+          } else {
+            alert("Ocurrio un erro intentalo mas tarde")
+          }
+        });
+      });
     });
 
     function editarProducts(item) {
