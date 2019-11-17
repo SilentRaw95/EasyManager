@@ -118,6 +118,22 @@ mongo.connect(url, {
       });
   });
 
+  app.post("/editProduct/:idProduct", (req, res) => {
+    console.log(req.body)
+    var id = mongoose.Types.ObjectId(req.params.idProduct)
+
+    const collection = db.collection('products')
+    collection.findOneAndUpdate({_id: id}, {$set: req.body})
+    .then((docs)=>{
+      console.log(docs)
+      return res.end("success")
+    })
+    .catch((err)=>{
+      console.log(err)
+      return res.end("error")
+    })
+  });
+
   app.post("/addUser", (req, res) => {
     var myData = new UserDB(req.body);
     myData.save()

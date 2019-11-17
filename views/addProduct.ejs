@@ -78,13 +78,15 @@
             <tr>
               <th scope='row'><%= item.name %></th>
               <th scope='row'><%= item.price %></th>
-              <th scope='row'><%= item.categories %></th>
+              <th scope='row'><%= item.stock %></th>
               <th scope='row'>
                 <% item.categories.forEach(function(data){ %>
                   <%= data %>
                 <% }) %>
               </th>
-              <th scope='row'></th>
+              <th scope='row'>
+                <input class="btn btn-primary" type="button" value="Editar"onclick="editarProducts('<%= JSON.stringify(item) %>')">
+              </th>
             </tr>
           <% }) %>
         </tbody>
@@ -99,6 +101,54 @@
         <% } %>
       </div>
     </div>
+
+    <!-- Modal de editar -->
+    <div class="modal fade" id="modalProduct" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!-- Contenido del modal -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar usuario</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form>
+            <div class="modal-body">
+              <div class="form-group">
+                <input id="prod_id" name="prod_id" class="form-control" type="text">
+              </div>
+              <!-- Formulario -->
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="prod_name">Nombre:</label>
+                  <input id="prod_name" name="prod_name" class="form-control" type="text" readonly="true">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="prod_categs">Categorias:</label>
+                  <input id="prod_categs" name="prod_categs" class="form-control" type="text">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="prod_stock">Stock:</label>
+                  <input id="prod_stock" name="prod_stock" class="form-control" type="number">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="prod_price">Precio:</label>
+                  <input id="prod_price" name="prod_price" class="form-control" type="number">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <input class="btn btn-primary" name="save_edit_prod" id="save_edit_prod" type="button" value="Guardar">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
   </body>
   <script>
     $(document).ready(function(){
@@ -120,7 +170,50 @@
           window.location.href = 'http://localhost:3000/addProduct/0/'
         }
       });
+
+      $("#save_edit_prod").click(function(){
+        let modalProduct = $("#modalProduct").val();
+        let prod_id = $("#prod_id").val();
+        let prod_categs = $("#prod_categs").val();
+        let prod_name = $("#prod_name").val();
+        let prod_stock = $("#prod_stock").val();
+        let prod_price = $("#prod_price").val();
+
+        let fetch_data = {
+          name: prod_name,
+          stock: parseInt(prod_stock),
+          price: parseInt(prod_price),
+          categories: prod_categs.split(',')
+        }
+
+        $.post("http://localhost:3000/editProduct/"+prod_id, fetch_data, function(data){
+          if(data === 'success'){
+            location.reload()
+          } else {
+            alert("Ocurrio un erro intentalo mas tarde")
+          }
+        });
+      });
     
     });
+
+    function editarProducts(item) {
+      let base = JSON.parse(item)
+      let categ = ''
+      for(let x = 0; base.categories.length > x; x++){
+        if(x == 0){
+          categ = base.categories[x]
+        } else {
+          categ = categ +","+ base.categories[x]
+        }
+      }
+
+      $("#modalProduct").modal("show");
+      $("#prod_id").val(base._id);
+      $("#prod_categs").val(categ);
+      $("#prod_name").val(base.name);
+      $("#prod_stock").val(base.stock);
+      $("#prod_price").val(base.price);
+    };
   </script>
 </html>
