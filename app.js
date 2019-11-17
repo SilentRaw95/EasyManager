@@ -40,7 +40,7 @@ mongo.connect(url, {
     password: String,
     role: String
   });
-  var UserDB = mongoose.model("user", userSchema);
+  var UserDB = mongoose.model("users", userSchema);
 
   var productSchema = new mongoose.Schema({
     name: String,
@@ -65,10 +65,54 @@ mongo.connect(url, {
     }
   });
 
-  // add user
-  app.get("/addUser", (req, res) => {
+  // add user (paginacion)
+  app.get("/addUser/:saltar", (req, res) => {
     if(req.session._id){
-      res.sendFile(__dirname + "/views/addUser.html");
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let filtro1 = false
+
+      // obtener total
+      const total = db.collection('users')
+      total.find({}).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        const collection = db.collection('users')
+        collection.find({}).skip(saltar).limit(pagination).toArray((err, users) => {
+          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
+  });
+
+  // add user (paginacion y filtros)
+  app.get("/addUser/:saltar/:nombre", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
+
+      // obtener total
+      const total = db.collection('users')
+      total.find({
+        first_name: {$regex: ".*" + nombre + ".*"}
+      }).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        let filtro1 = String(req.params.nombre)
+        const collection = db.collection('users')
+        collection.find({
+          first_name: {$regex: ".*" + nombre + ".*"}
+        }).skip(saltar).limit(pagination).toArray((err, users) => {
+          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1})
+        })
+      })
     } else {
       res.redirect("/")
     }
@@ -164,11 +208,28 @@ mongo.connect(url, {
     var myData = new UserDB(req.body);
     myData.save()
       .then(item => {
-        res.redirect("/addUser")
+        return res.end("success")
       })
       .catch(err => {
-        res.status(400).send("Unable to save to database");
+        console.log(err)
+        return res.end("error")
       });
+  });
+
+  app.post("/editUser/:idUser", (req, res) => {
+    console.log(req.body)
+    var id = mongoose.Types.ObjectId(req.params.idUser)
+
+    const collection = db.collection('users')
+    collection.findOneAndUpdate({_id: id}, {$set: req.body})
+    .then((docs)=>{
+      console.log(docs)
+      return res.end("success")
+    })
+    .catch((err)=>{
+      console.log(err)
+      return res.end("error")
+    })
   });
 
   app.post("/login", (req, res) => {

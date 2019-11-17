@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Easy Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="../css/base.css" rel="stylesheet" type="text/css">
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  </head>
+
+  <body>
+    <div class="contenedor espacio">
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="first_name">Nombre:</label>
+            <input id="first_name" name="first_name" class="form-control" type="text">
+          </div>
+          <div class="form-group col-md-6">
+            <label for="last_name">Apellido:</label>
+            <input id="last_name" name="last_name" class="form-control" type="text">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label for="username">Nombre de usuario:</label>
+            <input id="username" name="username" class="form-control" type="text">
+          </div>
+          <div class="form-group col-md-4">
+            <label for="password">Contraseña:</label>
+            <input id="password" name="password" class="form-control" type="password">
+          </div>
+          <div class="form-group col-md-4">
+            <label for="role">Rol:</label>
+            <select id="role" name="role" class="form-control">
+              <option value="administrador">Administrador</option>
+              <option value="sub_administrador">Sub adminstrador</option>
+              <option value="almacen">Almacen</option>
+              <option value="empleado">Empleado</option>
+            </select>
+          </div>
+        </div>
+        <!-- Boton -->
+        <div class="form-group">
+          <input class="btn btn-primary col-md-12" type="button" id="crear" value="Registrar">
+        </div>
+      </form>
+
+      <!--Busqueda-->
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-8">
+            <div class="input-group">
+              <input id="nameuser" name="nameuser" class="form-control" type="text" placeholder="Nombre">
+            </div>
+          </div>
+          <div class="form-group col-md-4">
+            <input class="btn btn-primary col-md-12" type="button" id="buscar" value="Busqueda">
+          </div>
+        </div>
+      </form>
+
+      <!-- tabla de datos -->
+      <table class="table espacio">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Apellido</th>
+            <th scope="col">Nombre de usuario</th>
+            <th scope="col">Rol</th>
+            <th scope="col"></th>
+          </tr>
+        <thead>
+        <tbody>
+          <% users.forEach(function(item){ %>
+            <tr>
+              <th scope='row'><%= item.first_name %></th>
+              <th scope='row'><%= item.last_name %></th>
+              <th scope='row'><%= item.username %></th>
+              <th scope='row'><%= item.role %></th>
+              <th scope='row'>
+                <input class="btn btn-primary" type="button" value="Editar"onclick="editarUsuario('<%= JSON.stringify(item) %>')">
+              </th>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class='pagination'>
+        <% for(var i=0; i < totalResults; i++) { %>
+          <% if (filtro1 != false) { %>
+            <a href="../../../addUser/<%= i %>/<%= filtro1 %>"><%= i %></a>
+          <% } else { %>
+            <a href="../../addUser/<%= i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Modal de editar -->
+    <div class="modal fade" id="modalUser" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!-- Contenido del modal -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar usuario</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form>
+            <div class="modal-body">
+              <div class="form-group">
+                <input id="user_id" name="user_id" class="form-control" type="text" style="display: none;">
+              </div>
+              <!-- Formulario -->
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="user_first_name">Nombre:</label>
+                  <input id="user_first_name" name="user_first_name" class="form-control" type="text" readonly="true">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="user_last_name">Apellido:</label>
+                  <input id="user_last_name" name="user_last_name" class="form-control" type="text">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="user_username">Nombre de usuario:</label>
+                  <input id="user_username" name="user_username" class="form-control" type="text">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="user_password">Contraseña:</label>
+                  <input id="user_password" name="user_password" class="form-control" type="password">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="user_role">Rol:</label>
+                  <select id="user_role" name="user_role" class="form-control">
+                    <option value="administrador">Administrador</option>
+                    <option value="sub_administrador">Sub adminstrador</option>
+                    <option value="almacen">Almacen</option>
+                    <option value="empleado">Empleado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <input class="btn btn-primary" name="save_edit_prod" id="save_edit_prod" type="button" value="Guardar">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </body>
+  <script>
+    $(document).ready(function(){
+
+      $("#buscar").click(function(){
+        let name = $("#nameuser").val();
+
+        if(name != ''){
+          // solo nombre
+          window.location.href = 'http://localhost:3000/addUser/0/'+name
+        } else {
+          window.location.href = 'http://localhost:3000/addUser/0/'
+        }
+      });
+
+      $("#save_edit_prod").click(function(){
+        let _id = $("#user_id").val();
+        let first_name = $("#user_first_name").val();
+        let last_name = $("#user_last_name").val();
+        let username = $("#user_username").val();
+        let password = $("#user_password").val();
+        let role = $("#user_role").val();
+
+        let fetch_data = {
+          first_name,
+          last_name,
+          username,
+          password,
+          role
+        }
+
+        $.post("http://localhost:3000/editUser/"+_id, fetch_data, function(data){
+          if(data === 'success'){
+            location.reload()
+          } else {
+            alert("Ocurrio un erro intentalo mas tarde")
+          }
+        });
+      });
+
+      $("#crear").click(function(){
+        let first_name = $("#first_name").val();
+        let last_name = $("#last_name").val();
+        let username = $("#username").val();
+        let password = $("#password").val();
+        let role = $("#role").val();
+
+        let fetch_data = {
+          first_name,
+          last_name,
+          username,
+          password,
+          role
+        }
+
+        $.post("http://localhost:3000/addUser/", fetch_data, function(data){
+          if(data === 'success'){
+            location.reload()
+          } else {
+            alert("Ocurrio un erro intentalo mas tarde")
+          }
+        });
+      });
+    });
+
+    function editarUsuario(item) {
+      let base = JSON.parse(item)
+
+      $("#modalUser").modal("show");
+      $("#user_id").val(base._id);
+      $("#user_first_name").val(base.first_name);
+      $("#user_last_name").val(base.last_name);
+      $("#user_username").val(base.username);
+      $("#user_password").val(base.password);
+      $("#user_role").val(base.role);
+    };
+  </script>
+</html>
