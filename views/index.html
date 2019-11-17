@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="css/login.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
   <body>
-    <form method="post" action="/login" class="login_container">
+    <form class="login_container">
       <img src="assets/Logo.png" class="img-fluid" alt="Responsive image">
 
       <div class="form-group">
@@ -17,10 +18,25 @@
 
       <div class="form-group row">
         <div class="col-sm-12">
-          <input class="btn btn-lg btn-primary btn-block" name="submit" type="submit" value="Ingresar">
+          <input class="btn btn-lg btn-primary btn-block" id="submit" name="submit" type="button" value="Ingresar">
         </div>
       </div>
-      <p class="text-muted"><?php echo $error; ?></p>
     </form>
   </body>
+  <script>
+    $(document).ready(function(){
+      $("#submit").click(function(){
+        let username = $("#username").val();
+        let password = $("#password").val();
+
+        $.post("http://localhost:3000/login/", {username, password}, function(data){
+          if(data === 'success'){
+            window.location.href = 'http://localhost:3000/addProduct/0/'
+          } else {
+            alert("No concuerdan el usuario y contraseña")
+          }
+        });
+      });
+    });
+  </script>
 </html>

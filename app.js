@@ -1,4 +1,6 @@
 var express = require("express");
+var session = require('express-session');
+var secret = 'notThatSecretSecret';
 var app = express();
 var port = 3000;
 var bodyParser = require('body-parser');
@@ -6,6 +8,11 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({
+  _id: null,
+  role: null,
+  secret: secret
+}));
 
 // conexion a mongodb
 var mongoose = require("mongoose");
@@ -51,57 +58,69 @@ mongo.connect(url, {
 
   // add user
   app.get("/addUser", (req, res) => {
-    res.sendFile(__dirname + "/views/addUser.html");
+    if(req.session._id){
+      res.sendFile(__dirname + "/views/addUser.html");
+    } else {
+      res.redirect("/")
+    }
   });
 
   // add product (paginacion)
   app.get("/addProduct/:saltar", (req, res) => {
-    // valores
-    let pagination = 5
-    let saltar = parseInt(req.params.saltar)
-    let filtro1 = false
-    let filtro2 = false
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let filtro1 = false
+      let filtro2 = false
 
-    // obtener total
-    const total = db.collection('products')
-    total.find({}).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / pagination)
+      // obtener total
+      const total = db.collection('products')
+      total.find({}).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
 
-      // mostrar resultados
-      const collection = db.collection('products')
-      collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
-        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+        // mostrar resultados
+        const collection = db.collection('products')
+        collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
+          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+        })
       })
-    })
+    } else {
+      res.redirect("/")
+    }
   });
 
   // add product (paginacion y filtros)
   app.get("/addProduct/:saltar/:nombre/:categoria", (req, res) => {
-    // valores
-    let pagination = 5
-    let saltar = parseInt(req.params.saltar)
-    let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
-    let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
+      let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
 
-    // obtener total
-    const total = db.collection('products')
-    total.find({
-      name: {$regex: ".*" + nombre + ".*"},
-      categories: [categoria]
-    }).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / pagination)
-
-      // mostrar resultados
-      let filtro1 = String(req.params.nombre)
-      let filtro2 = String(req.params.categoria)
-      const collection = db.collection('products')
-      collection.find({
+      // obtener total
+      const total = db.collection('products')
+      total.find({
         name: {$regex: ".*" + nombre + ".*"},
         categories: [categoria]
-      }).skip(saltar).limit(pagination).toArray((err, products) => {
-        res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+      }).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        let filtro1 = String(req.params.nombre)
+        let filtro2 = String(req.params.categoria)
+        const collection = db.collection('products')
+        collection.find({
+          name: {$regex: ".*" + nombre + ".*"},
+          categories: [categoria]
+        }).skip(saltar).limit(pagination).toArray((err, products) => {
+          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+        })
       })
-    })
+    } else {
+      res.redirect("/")
+    }
   });
 
   // apis
@@ -147,11 +166,21 @@ mongo.connect(url, {
 
   app.post("/login", (req, res) => {
     const collection = db.collection('users')
-    collection.findOne({name: req.body.username, password: req.body.password}, (err, item) => {
-      if(item){
-        res.redirect("/")
-      }
-    })
+    collection.findOne({username: req.body.username, password: req.body.password})
+      .then((docs)=>{
+        console.log(docs)
+        if(docs){
+          req.session._id = docs._id;
+          req.session.role = docs.role;
+          return res.end("success")
+        } else {
+          return res.end("error")
+        }
+      })
+      .catch((err)=>{
+        console.log(err)
+        return res.end("error")
+      })
   });
 
   // logs
