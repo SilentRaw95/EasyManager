@@ -152,22 +152,33 @@ mongo.connect(url, {
       let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
       let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
 
+      // creacion de query
+      let query = {}
+      if(nombre && categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"},
+          categories: categoria
+        }
+      } else if(nombre && !categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"}
+        }
+      } else {
+        query = {
+          categories: categoria
+        }
+      }
+
       // obtener total
       const total = db.collection('products')
-      total.find({
-        name: {$regex: ".*" + nombre + ".*"},
-        categories: [categoria]
-      }).toArray((err, numResults) => {
+      total.find(query).toArray((err, numResults) => {
         let totalResults = Math.ceil(numResults.length / pagination)
 
         // mostrar resultados
         let filtro1 = String(req.params.nombre)
         let filtro2 = String(req.params.categoria)
         const collection = db.collection('products')
-        collection.find({
-          name: {$regex: ".*" + nombre + ".*"},
-          categories: [categoria]
-        }).skip(saltar).limit(pagination).toArray((err, products) => {
+        collection.find(query).skip(saltar).limit(pagination).toArray((err, products) => {
           res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
         })
       })
