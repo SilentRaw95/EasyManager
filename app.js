@@ -50,6 +50,18 @@ mongo.connect(url, {
   });
   var ProductDB = mongoose.model("products", productSchema);
 
+  var modificationSchema = new mongoose.Schema({
+    date: String,
+    product: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
+    employe: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    modification: {
+      price: Number,
+      stock: Number,
+      categories: [String]
+    }
+  });
+  var ModificationDB = mongoose.model("modifications", modificationSchema);
+
   // rutas
   // pagina de inicio
   app.get("/", (req, res) => {
@@ -187,6 +199,38 @@ mongo.connect(url, {
     }
   });
 
+  // ver modificaciones (paginacion)
+  app.get("/seeModifications/:saltar", (req, res) => {
+    // valores
+    let pagination = 5
+    let saltar = parseInt(req.params.saltar)
+    let filtro1 = false
+    let filtro2 = false
+
+    // obtener total
+    const total = db.collection('modifications')
+    total.find({}).toArray((err, numResults) => {
+      let totalResults = Math.ceil(numResults.length / pagination)
+
+      // mostrar resultados
+      ModificationDB.find({})
+        .skip(saltar)
+        .limit(pagination)
+        .populate('product')
+        .exec((err, modif) => {
+        console.log('uwu: ',modif)
+        res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+      })
+    })
+    /*
+    if(req.session._id){
+      
+    } else {
+      res.redirect("/")
+    }
+    */
+  });
+
   // apis
   app.post("/addProduct", (req, res) => {
     var myData = new ProductDB(req.body);
@@ -207,7 +251,27 @@ mongo.connect(url, {
     collection.findOneAndUpdate({_id: id}, {$set: req.body})
     .then((docs)=>{
       console.log(docs)
-      return res.end("success")
+
+      // create modification
+      let dateString = "" + new Date()
+      let data = {
+        date: dateString,
+        product:  mongoose.Types.ObjectId(id),
+        employe: mongoose.Types.ObjectId(req.session._id),
+        modification: {
+          price: req.body.price,
+          stock: req.body.stock,
+          categories: req.body.categories
+        }
+      }
+      var createModification = new ModificationDB(data);
+      createModification.save()
+        .then(item => {
+          return res.end("success")
+        })
+        .catch(err => {
+          return res.end("error")
+        });
     })
     .catch((err)=>{
       console.log(err)
