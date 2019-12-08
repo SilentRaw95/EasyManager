@@ -14,6 +14,9 @@ app.use(session({
   secret: secret
 }));
 
+// otras librerias
+var moment = require("moment")
+
 // conexion a mongodb
 var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
@@ -54,6 +57,7 @@ mongo.connect(url, {
     date: String,
     product: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
     employe: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    name: String,
     modification: {
       price: Number,
       stock: Number,
@@ -201,34 +205,81 @@ mongo.connect(url, {
 
   // ver modificaciones (paginacion)
   app.get("/seeModifications/:saltar", (req, res) => {
-    // valores
-    let pagination = 5
-    let saltar = parseInt(req.params.saltar)
-    let filtro1 = false
-    let filtro2 = false
-
-    // obtener total
-    const total = db.collection('modifications')
-    total.find({}).toArray((err, numResults) => {
-      let totalResults = Math.ceil(numResults.length / pagination)
-
-      // mostrar resultados
-      ModificationDB.find({})
-        .skip(saltar)
-        .limit(pagination)
-        .populate('product')
-        .exec((err, modif) => {
-        console.log('uwu: ',modif)
-        res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
-      })
-    })
-    /*
     if(req.session._id){
-      
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let filtro1 = false
+      let filtro2 = false
+
+      // obtener total
+      const total = db.collection('modifications')
+      total.find({}).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        ModificationDB.find({})
+          .skip(saltar)
+          .limit(pagination)
+          .populate('product')
+          .populate('employe')
+          .exec((err, modif) => {
+          console.log('modifs: ',modif)
+          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+        })
+      })
     } else {
       res.redirect("/")
     }
-    */
+  });
+
+  // ver modificaciones (paginacion y busqueda)
+  app.get("/seeModifications/:saltar/:nombre/:categoria", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
+      let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
+
+      // creacion de query
+      let query = {}
+      if(nombre && categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"},
+          "modification.categories": categoria
+        }
+      } else if(nombre && !categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"}
+        }
+      } else {
+        query = {
+          "modification.categories": categoria
+        }
+      }
+
+      // obtener total
+      const total = db.collection('modifications')
+      total.find(query).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        let filtro1 = String(req.params.nombre)
+        let filtro2 = String(req.params.categoria)
+        ModificationDB.find(query)
+          .skip(saltar)
+          .limit(pagination)
+          .populate('product')
+          .populate('employe')
+          .exec((err, modif) => {
+          console.log('modifs search: ',modif)
+          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
   });
 
   // apis
@@ -253,11 +304,12 @@ mongo.connect(url, {
       console.log(docs)
 
       // create modification
-      let dateString = "" + new Date()
+      let dateString = "" + moment().format('MM/DD/YYYY, h:mm:ss a')
       let data = {
         date: dateString,
         product:  mongoose.Types.ObjectId(id),
         employe: mongoose.Types.ObjectId(req.session._id),
+        name: req.body.name,
         modification: {
           price: req.body.price,
           stock: req.body.stock,

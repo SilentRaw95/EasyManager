@@ -40,10 +40,24 @@
             <th scope="col">Precio</th>
             <th scope="col">Cantidad</th>
             <th scope="col">Categorias</th>
-            <th scope="col">Modificacion</th>
+            <th scope="col">Fecha de modificacion</th>
           </tr>
         <thead>
         <tbody>
+          <% modif.forEach(function(item){ %>
+            <tr>
+              <th scope='row'><%= item.product.name %></th>
+              <th scope='row'><%= item.employe.username %></th>
+              <th scope='row'><%= item.modification.price %></th>
+              <th scope='row'><%= item.modification.stock %></th>
+              <th scope='row'>
+                <% item.modification.categories.forEach(function(data){ %>
+                  <%= data %>
+                <% }) %>
+              </th>
+              <th scope='row'><%= item.date %></th>
+            </tr>
+          <% }) %>
         </tbody>
       </table>
       <div class='pagination'>
@@ -58,4 +72,25 @@
     </div>
     
   </body>
+  <script>
+    $(document).ready(function(){
+      $("#buscar").click(function(){
+        let name = $("#nameproduct").val();
+        let categoria = $("#categoria").val();
+
+        if(name != '' && categoria == ''){
+          // solo nombre
+          window.location.href = 'http://localhost:3000/seeModifications/0/'+name+'/null'
+        } else if(name == '' && categoria != ''){
+          // solo categoria
+          window.location.href = 'http://localhost:3000/seeModifications/0/null/'+categoria
+        } else if(name != '' && categoria != '') {
+          // ambas
+          window.location.href = 'http://localhost:3000/seeModifications/0/'+name+'/'+categoria
+        } else {
+          window.location.href = 'http://localhost:3000/seeModifications/0/'
+        }
+      })
+    })
+  </script>
 </html>
