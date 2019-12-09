@@ -69,7 +69,7 @@ mongo.connect(url, {
   var sells_Schema = new mongoose.Schema({
     date: String,
     total: Number,
-    productos: [{
+    products: [{
       product_data: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
       name: String,
       quantity: Number,
@@ -439,6 +439,25 @@ mongo.connect(url, {
       console.log(err)
       return res.end("error")
     })
+  });
+
+  app.post("/sellProducts", (req, res) => {
+    /*
+    let dataPost = {}
+    dataPost.date = "" + moment().format('MM/DD/YYYY, h:mm:ss a')
+    req.body.forEach(element => {
+      dataPost.total = dataPost.total + req.body.subtotal
+    })
+    dataPost.products = req.body
+    var myData = new Sells_SchemaDB(dataPost);
+    myData.save()
+      .then(item => {
+        return res.end("success")
+      })
+      .catch(err => {
+        return res.end("error")
+      });
+    */
   });
 
   app.post("/login", (req, res) => {

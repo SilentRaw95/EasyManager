@@ -92,10 +92,10 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form onsubmit="return doSomething();" action="" method="post">
+          <form action="" method="post">
             <div class="modal-body"></div>
             <div class="modal-footer">
-              <input class="btn btn-primary" name="save_order" id="save_order" type="submit" value="Guardar">
+              <input class="btn btn-primary" name="save_order" id="save_order" type="button" value="Guardar">
               <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
             </div>
           </form>
@@ -136,7 +136,7 @@
           name: fullData.name,
           quantity: cant,
           price: fullData.price,
-          sub_total: cant * fullData.price
+          subtotal: cant * fullData.price
         }
         carrito.push(temp)
         var divText = document.getElementById('icon_cart');
@@ -156,12 +156,12 @@
       var newCant = document.getElementById(field).value;
       if(newCant <= carrito[index].stock){
         carrito[index].quantity = newCant;
-        carrito[index].sub_total = newCant * carrito[index].price;
+        carrito[index].subtotal = newCant * carrito[index].price;
         document.getElementById(field_sub).value = newCant * carrito[index].price;
         //actualizar el total
         var total = 0;
         for(var i = 0; i < carrito.length; i++){
-          total = total + carrito[index].sub_total;
+          total = total + carrito[index].subtotal;
         }
         localStorage.setItem("carrito", JSON.stringify(carrito));
         document.getElementById("total").value = ""+total;
@@ -220,13 +220,13 @@
         estructura = estructura + '<input class="form-control" onchange="actualizarCantidad('+i+')" id="cant_'+i+'" name="cant_'+i+'" type="number" min="1" value="'+carrito[i].quantity+'">';
         estructura = estructura + '</div>';
         estructura = estructura + '<div class="form-group col-md-2">';
-        estructura = estructura + '<input class="form-control" type="text" id="sub_'+i+'" name="sub_'+i+'" value="'+carrito[i].sub_total+'" readonly="true">';
+        estructura = estructura + '<input class="form-control" type="text" id="sub_'+i+'" name="sub_'+i+'" value="'+carrito[i].subtotal+'" readonly="true">';
         estructura = estructura + '</div>';
         estructura = estructura + '<div class="form-group col-md-2">';
         estructura = estructura + '<button type="button" class="btn btn-danger" onclick="deleteFn('+i+')">Borrar</button>';
         estructura = estructura + '</div>';
         estructura = estructura + '</div>';
-        total = total + carrito[i].sub_total;
+        total = total + carrito[i].subtotal;
       }
       estructura = estructura + '<div class="form-row">';
       estructura = estructura + '<p>Label:</p>';
@@ -252,6 +252,17 @@
         } else {
           window.location.href = 'http://localhost:3000/sell/0/'
         }
+      })
+
+      // doSomething()
+      $("#save_order").click(function(){
+        $.post("http://localhost:3000/sellProducts/", carrito, function(data){
+          if(data === 'success'){
+            location.reload()
+          } else {
+            alert("Ocurrio un erro intentalo mas tarde")
+          }
+        });
       })
     })
   </script>
