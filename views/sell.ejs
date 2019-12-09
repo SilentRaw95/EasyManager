@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Easy Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="../css/base.css" rel="stylesheet" type="text/css">
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  </head>
+
+  <body>
+    <div class="contenedor espacio">
+      <!--Busqueda-->
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <div class="input-group">
+              <input id="nameproduct" name="nameproduct" class="form-control" type="text" placeholder="Nombre">
+            </div>
+          </div>
+          <div class="form-group col-md-4">
+            <div class="input-group">
+              <input id="categoria" name="categoria" class="form-control" type="text" placeholder="Categoria">
+            </div>
+          </div>
+          <div class="form-group col-md-4">
+            <input class="btn btn-primary col-md-12" type="button" id="buscar" value="Busqueda">
+          </div>
+        </div>
+      </form>
+
+      <!-- tabla de datos -->
+      <table class="table espacio">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Producto</th>
+            <th scope="col">Precio</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Categorias</th>
+            <th scope="col">Cantidad</th>
+            <th scope="col">
+              <button class="btn btn-primary" id="cart" onclick="verCarrito()">
+                <i class="fa fa-shopping-cart" id="icon_cart"> 0</i>
+              </button>
+            </th>
+          </tr>
+        <thead>
+        <tbody>
+          <% products.forEach(function(item){ %>
+            <tr>
+              <th scope='row'><%= item.name %></th>
+              <th scope='row'><%= item.price %></th>
+              <th scope='row'><%= item.stock %></th>
+              <th scope='row'>
+                <% item.categories.forEach(function(data){ %>
+                  <%= data %>
+                <% }) %>
+              </th>
+              <th scope='row'>
+                <input id="field_<%= item._id %>" class="form-control custominput" type="number" min="1">
+              </th>
+              <th scope='row'>
+                <button class="btn btn-primary" onclick="addProduct('<%= JSON.stringify(item) %>')">+</button>
+              </th>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class='pagination'>
+        <% for(var i=0; i < totalResults; i++) { %>
+          <% if (filtro1 != false || filtro2 != false) { %>
+            <a href="../../../../sell/<%= i %>/<%= filtro1 %>/<%= filtro2 %>"><%= i %></a>
+          <% } else { %>
+            <a href="../../sell/<%= i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+    
+  </body>
+  <script>
+    // carrito
+    var carrito = []
+
+    //storage 
+    var storage = JSON.parse(localStorage.getItem("carrito"))
+    console.log(storage)
+    if (storage != null){
+      var carrito = storage
+      var divText = document.getElementById('icon_cart');
+      divText.textContent = " "+carrito.length;
+    }
+
+    //anadir algo al carrito
+    function addProduct(data){
+      let fullData = JSON.parse(data)
+
+      var found = false;
+      var field_id = "field_"+fullData._id;
+      var cant = document.getElementById(field_id).value;
+      for(var i = 0; i < carrito.length; i++){
+        if(carrito[i]._id == fullData._id){
+          found = true;
+        }
+      }
+      
+      if(cant <= fullData.stock && found == false){
+        var temp = {
+          id_prod: fullData._id,
+          nombre: fullData.name,
+          quantity: cant,
+          price: fullData.price,
+          sub_total: cant * fullData.price
+        }
+        carrito.push(temp)
+        var divText = document.getElementById('icon_cart');
+        divText.textContent = " "+carrito.length;
+        // Store
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+      } else if(found == false) {
+        alert("Stock insuficiente")
+      } else {
+        alert("Ya tienes el producto en el carrito")
+      }
+    }
+
+    $(document).ready(function(){
+
+      $("#buscar").click(function(){
+        let name = $("#nameproduct").val();
+        let categoria = $("#categoria").val();
+
+        if(name != '' && categoria == ''){
+          // solo nombre
+          window.location.href = 'http://localhost:3000/sell/0/'+name+'/null'
+        } else if(name == '' && categoria != ''){
+          // solo categoria
+          window.location.href = 'http://localhost:3000/sell/0/null/'+categoria
+        } else if(name != '' && categoria != '') {
+          // ambas
+          window.location.href = 'http://localhost:3000/sell/0/'+name+'/'+categoria
+        } else {
+          window.location.href = 'http://localhost:3000/sell/0/'
+        }
+      })
+
+      function verCarrito(){
+        $("#miModal").modal("show");
+        printTable();
+      }
+    
+    })
+  </script>
+</html>

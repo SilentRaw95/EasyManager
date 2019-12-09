@@ -66,6 +66,19 @@ mongo.connect(url, {
   });
   var ModificationDB = mongoose.model("modifications", modificationSchema);
 
+  var sells_Schema = new mongoose.Schema({
+    date: String,
+    total: Number,
+    productos: [{
+      product_data: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
+      name: String,
+      quantity: Number,
+      price: Number,
+      subtotal: Number
+    }]
+  })
+  var Sells_SchemaDB = mongoose.model("sells", sells_Schema);
+
   // rutas
   // pagina de inicio
   app.get("/", (req, res) => {
@@ -275,6 +288,75 @@ mongo.connect(url, {
           .exec((err, modif) => {
           console.log('modifs search: ',modif)
           res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
+  });
+
+  // vender (paginacion)
+  app.get("/sell/:saltar", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let filtro1 = false
+      let filtro2 = false
+
+      // obtener total
+      const total = db.collection('products')
+      total.find({}).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        const collection = db.collection('products')
+        collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
+          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
+  });
+
+  // vender (paginacion y filtros)
+  app.get("/sell/:saltar/:nombre/:categoria", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let nombre = String(req.params.nombre) == "null" ? "" : String(req.params.nombre)
+      let categoria = String(req.params.categoria) == "null" ? "" : String(req.params.categoria)
+
+      // creacion de query
+      let query = {}
+      if(nombre && categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"},
+          categories: categoria
+        }
+      } else if(nombre && !categoria){
+        query = {
+          name: {$regex: ".*" + nombre + ".*"}
+        }
+      } else {
+        query = {
+          categories: categoria
+        }
+      }
+
+      // obtener total
+      const total = db.collection('products')
+      total.find(query).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        let filtro1 = String(req.params.nombre)
+        let filtro2 = String(req.params.categoria)
+        const collection = db.collection('products')
+        collection.find(query).skip(saltar).limit(pagination).toArray((err, products) => {
+          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2})
         })
       })
     } else {
