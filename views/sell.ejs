@@ -81,6 +81,27 @@
         <% } %>
       </div>
     </div>
+
+    <div class="modal fade" id="miModal" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!-- Contenido del modal -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar pedido</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form onsubmit="return doSomething();" action="" method="post">
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+              <input class="btn btn-primary" name="save_order" id="save_order" type="submit" value="Guardar">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
     
   </body>
   <script>
@@ -111,8 +132,8 @@
       
       if(cant <= fullData.stock && found == false){
         var temp = {
-          id_prod: fullData._id,
-          nombre: fullData.name,
+          product_id: fullData._id,
+          name: fullData.name,
           quantity: cant,
           price: fullData.price,
           sub_total: cant * fullData.price
@@ -129,8 +150,92 @@
       }
     }
 
-    $(document).ready(function(){
+    function actualizarCantidad(index){
+      var field = "cant_"+index;
+      var field_sub = "sub_"+index;
+      var newCant = document.getElementById(field).value;
+      if(newCant <= carrito[index].stock){
+        carrito[index].quantity = newCant;
+        carrito[index].sub_total = newCant * carrito[index].price;
+        document.getElementById(field_sub).value = newCant * carrito[index].price;
+        //actualizar el total
+        var total = 0;
+        for(var i = 0; i < carrito.length; i++){
+          total = total + carrito[index].sub_total;
+        }
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+        document.getElementById("total").value = ""+total;
+      } else {
+        document.getElementById(field).value = 1;
+        alert("Stock insuficiente")
+      }
+    }
 
+    function doSomething() {
+      // Store
+      localStorage.setItem("carrito", null);
+    }
+
+    function verCarrito(){
+      $("#miModal").modal("show");
+      printTable();
+    }
+
+    function deleteFn(index) {
+      carrito.splice(index, 1);
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      printTable();
+    }
+
+    function printTable(){
+      var total = 0;
+      var estructura = '<div class="form-row">';
+      estructura = estructura + '<div class="form-group col-md-3">';
+      estructura = estructura + '<label>Nombre:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-3">';
+      estructura = estructura + '<label>Precio:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2">';
+      estructura = estructura + '<label>Cantidad:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2">';
+      estructura = estructura + '<label>Subtotal:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2"></div>';
+      estructura = estructura + '<input class="form-control" style="display: none;" type="text" name="cant_prod" value="'+carrito.length+'" readonly="true">';
+      estructura = estructura + '</div>';
+      estructura = estructura + '</div>';
+      for(var i = 0; i < carrito.length; i++){
+        estructura = estructura + '<input id="id_prod_'+i+'" name="id_prod_'+i+'" class="form-control" style="display: none;" type="text" value="'+carrito[i].product_id+'">';
+        
+        estructura = estructura + '<div class="form-row">';
+        estructura = estructura + '<div class="form-group col-md-3">';
+        estructura = estructura + '<input class="form-control" type="text" value="'+carrito[i].name+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-3">';
+        estructura = estructura + '<input class="form-control" type="text" value="'+carrito[i].price+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-2">';
+        estructura = estructura + '<input class="form-control" onchange="actualizarCantidad('+i+')" id="cant_'+i+'" name="cant_'+i+'" type="number" min="1" value="'+carrito[i].quantity+'">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-2">';
+        estructura = estructura + '<input class="form-control" type="text" id="sub_'+i+'" name="sub_'+i+'" value="'+carrito[i].sub_total+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-2">';
+        estructura = estructura + '<button type="button" class="btn btn-danger" onclick="deleteFn('+i+')">Borrar</button>';
+        estructura = estructura + '</div>';
+        estructura = estructura + '</div>';
+        total = total + carrito[i].sub_total;
+      }
+      estructura = estructura + '<div class="form-row">';
+      estructura = estructura + '<p>Label:</p>';
+      estructura = estructura + '<input class="form-control" type="text" id="total" name="total" value="'+total+' $" readonly="true">';
+      estructura = estructura + '</div>';
+      $("div.modal-body").html(estructura);
+    }
+
+    $(document).ready(function(){
       $("#buscar").click(function(){
         let name = $("#nameproduct").val();
         let categoria = $("#categoria").val();
@@ -148,12 +253,6 @@
           window.location.href = 'http://localhost:3000/sell/0/'
         }
       })
-
-      function verCarrito(){
-        $("#miModal").modal("show");
-        printTable();
-      }
-    
     })
   </script>
 </html>
