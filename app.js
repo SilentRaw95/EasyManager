@@ -442,6 +442,7 @@ mongo.connect(url, {
   });
 
   app.post("/sellProducts", (req, res) => {
+    // reducir stock
     req.body.data.forEach(item => {
       const collection = db.collection('products')
       var temp_id = mongoose.Types.ObjectId(item.product_id)
@@ -454,11 +455,19 @@ mongo.connect(url, {
         return res.end("error")
       })
     })
-    return res.end("success")
-    /*
+    // guardar venta
     let dataPost = {}
     dataPost.date = "" + moment().format('MM/DD/YYYY, h:mm:ss a')
-    req.body.data.forEach(element => {
+    dataPost.total = 0
+    dataPost.products = []
+    req.body.data.forEach((element, index) => {
+      dataPost.products.push({
+        product_data: mongoose.Types.ObjectId(element.product_data),
+        name: element.name,
+        quantity: parseInt(element.quantity),
+        price: element.price,
+        subtotal: element.subtotal
+      })
       dataPost.total = dataPost.total + element.subtotal
     })
     dataPost.products = req.body.data
@@ -468,9 +477,9 @@ mongo.connect(url, {
         return res.end("success")
       })
       .catch(err => {
+        console.log(err)
         return res.end("error")
-      });
-    */
+      })
   });
 
   app.post("/login", (req, res) => {
