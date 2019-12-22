@@ -442,13 +442,26 @@ mongo.connect(url, {
   });
 
   app.post("/sellProducts", (req, res) => {
+    req.body.data.forEach(item => {
+      const collection = db.collection('products')
+      var temp_id = mongoose.Types.ObjectId(item.product_id)
+      collection.findOneAndUpdate({_id: temp_id}, {$inc:{ stock: -item.quantity }} )
+      .then((docs)=>{
+        console.log('ook')
+      })
+      .catch((err)=>{
+        console.log(err)
+        return res.end("error")
+      })
+    })
+    return res.end("success")
     /*
     let dataPost = {}
     dataPost.date = "" + moment().format('MM/DD/YYYY, h:mm:ss a')
-    req.body.forEach(element => {
-      dataPost.total = dataPost.total + req.body.subtotal
+    req.body.data.forEach(element => {
+      dataPost.total = dataPost.total + element.subtotal
     })
-    dataPost.products = req.body
+    dataPost.products = req.body.data
     var myData = new Sells_SchemaDB(dataPost);
     myData.save()
       .then(item => {

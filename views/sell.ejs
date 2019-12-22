@@ -132,7 +132,7 @@
       
       if(cant <= fullData.stock && found == false){
         var temp = {
-          product_id: fullData._id,
+          product_data: fullData._id,
           name: fullData.name,
           quantity: cant,
           price: fullData.price,
@@ -207,7 +207,7 @@
       estructura = estructura + '</div>';
       estructura = estructura + '</div>';
       for(var i = 0; i < carrito.length; i++){
-        estructura = estructura + '<input id="id_prod_'+i+'" name="id_prod_'+i+'" class="form-control" style="display: none;" type="text" value="'+carrito[i].product_id+'">';
+        estructura = estructura + '<input id="id_prod_'+i+'" name="id_prod_'+i+'" class="form-control" style="display: none;" type="text" value="'+carrito[i].product_data+'">';
         
         estructura = estructura + '<div class="form-row">';
         estructura = estructura + '<div class="form-group col-md-3">';
@@ -256,8 +256,10 @@
 
       // doSomething()
       $("#save_order").click(function(){
-        $.post("http://localhost:3000/sellProducts/", carrito, function(data){
+        console.log("carrito: ",carrito)
+        $.post("http://localhost:3000/sellProducts", {data: carrito}, function(data){
           if(data === 'success'){
+            localStorage.setItem("carrito", null);
             location.reload()
           } else {
             alert("Ocurrio un erro intentalo mas tarde")
