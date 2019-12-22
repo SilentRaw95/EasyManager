@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Easy Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="../css/base.css" rel="stylesheet" type="text/css">
+    <link href="../../../css/base.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  </head>
+
+  <body>
+    <div class="contenedor espacio">
+      <!--Busqueda-->
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <div class="input-group">
+              <input id="date" name="date" class="form-control" type="text" placeholder="Fecha">
+            </div>
+          </div>
+          <div class="form-group col-md-4">
+            <input class="btn btn-primary col-md-12" type="button" id="buscar" value="Busqueda">
+          </div>
+        </div>
+      </form>
+
+      <!-- tabla de datos -->
+      <table class="table espacio">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Empleado</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Total</th>
+            <th scope="col">Productos</th>
+          </tr>
+        <thead>
+        <tbody>
+          <% sells.forEach(function(item){ %>
+            <tr>
+              <th scope='row'><%= item.employe.username %></th>
+              <th scope='row'><%= item.date %></th>
+              <th scope='row'><%= item.total %></th>
+              <th scope='row'>
+                <button class="btn btn-primary" onclick="seeProducts('<%= JSON.stringify(item.products) %>')">Ver productos</button>
+              </th>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class='pagination'>
+        <% for(var i=0; i < totalResults; i++) { %>
+          <% if (filtro1 != false) { %>
+            <a href="../../../../viewSells/<%= i %>/<%= filtro1 %>"><%= i %></a>
+          <% } else { %>
+            <a href="../../viewSells/<%= i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="modal fade" id="miModal" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <!-- Contenido del modal -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Pedido</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="" method="post">
+            <div class="modal-body"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+  </body>
+  <script>
+    $(document).ready(function(){
+      $("#buscar").click(function(){
+        let name = $("#nameproduct").val();
+        let categoria = $("#categoria").val();
+
+        if(name != '' && categoria == ''){
+          // solo nombre
+          window.location.href = 'http://localhost:3000/viewSells/0/'+name+'/null'
+        } else if(name == '' && categoria != ''){
+          // solo categoria
+          window.location.href = 'http://localhost:3000/viewSells/0/null/'+categoria
+        } else if(name != '' && categoria != '') {
+          // ambas
+          window.location.href = 'http://localhost:3000/viewSells/0/'+name+'/'+categoria
+        } else {
+          window.location.href = 'http://localhost:3000/viewSells/0/'
+        }
+      })
+    })
+
+    function seeProducts(productos){
+      let carrito = JSON.parse(productos)
+      $("#miModal").modal("show");
+      printTable(carrito);
+    }
+
+    function printTable(carrito){
+      var total = 0;
+      var estructura = '<div class="form-row">';
+      estructura = estructura + '<div class="form-group col-md-3">';
+      estructura = estructura + '<label>Nombre:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-3">';
+      estructura = estructura + '<label>Precio:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2">';
+      estructura = estructura + '<label>Cantidad:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2">';
+      estructura = estructura + '<label>Subtotal:</label>';
+      estructura = estructura + '</div>';
+      estructura = estructura + '<div class="form-group col-md-2"></div>';
+      estructura = estructura + '<input class="form-control" style="display: none;" type="text" name="cant_prod" value="'+carrito.length+'" readonly="true">';
+      estructura = estructura + '</div>';
+      estructura = estructura + '</div>';
+      for(var i = 0; i < carrito.length; i++){
+        estructura = estructura + '<input id="id_prod_'+i+'" name="id_prod_'+i+'" class="form-control" style="display: none;" type="text" value="'+carrito[i].product_data+'">';
+        
+        estructura = estructura + '<div class="form-row">';
+        estructura = estructura + '<div class="form-group col-md-3">';
+        estructura = estructura + '<input class="form-control" type="text" value="'+carrito[i].name+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-3">';
+        estructura = estructura + '<input class="form-control" type="text" value="'+carrito[i].price+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-2">';
+        estructura = estructura + '<input class="form-control" id="cant_'+i+'" name="cant_'+i+'" type="number" min="1" value="'+carrito[i].quantity+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '<div class="form-group col-md-2">';
+        estructura = estructura + '<input class="form-control" type="text" id="sub_'+i+'" name="sub_'+i+'" value="'+carrito[i].subtotal+'" readonly="true">';
+        estructura = estructura + '</div>';
+        estructura = estructura + '</div>';
+        total = total + carrito[i].subtotal;
+      }
+      estructura = estructura + '<div class="form-row">';
+      estructura = estructura + '<p>Total:</p>';
+      estructura = estructura + '<input class="form-control" type="text" id="total" name="total" value="'+total+' $" readonly="true">';
+      estructura = estructura + '</div>';
+      $("div.modal-body").html(estructura);
+    }
+
+  </script>
+</html>

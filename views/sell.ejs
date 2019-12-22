@@ -229,7 +229,7 @@
         total = total + carrito[i].subtotal;
       }
       estructura = estructura + '<div class="form-row">';
-      estructura = estructura + '<p>Label:</p>';
+      estructura = estructura + '<p>Total:</p>';
       estructura = estructura + '<input class="form-control" type="text" id="total" name="total" value="'+total+' $" readonly="true">';
       estructura = estructura + '</div>';
       $("div.modal-body").html(estructura);

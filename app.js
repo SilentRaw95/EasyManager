@@ -69,6 +69,7 @@ mongo.connect(url, {
   var sells_Schema = new mongoose.Schema({
     date: String,
     total: Number,
+    employe: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     products: [{
       product_data: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
       name: String,
@@ -295,6 +296,70 @@ mongo.connect(url, {
     }
   });
 
+  // ver ventas (paginacion)
+  app.get("/viewSells/:saltar", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let filtro1 = false
+
+      // obtener total
+      const total = db.collection('sells')
+      total.find({}).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        Sells_SchemaDB.find({})
+          .skip(saltar)
+          .limit(pagination)
+          .populate('employe')
+          .populate('products.product_data')
+          .exec((err, sells) => {
+          console.log('ventas: ',sells)
+          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
+  });
+
+  // ver ventas (paginacion y busqueda)
+  app.get("/viewSells/:saltar/:fecha", (req, res) => {
+    if(req.session._id){
+      // valores
+      let pagination = 5
+      let saltar = parseInt(req.params.saltar)
+      let fecha = String(req.params.fecha) == "null" ? "" : String(req.params.fecha)
+
+      // creacion de query
+      let query = {
+        date: fecha
+      }
+
+      // obtener total
+      const total = db.collection('sells')
+      total.find(query).toArray((err, numResults) => {
+        let totalResults = Math.ceil(numResults.length / pagination)
+
+        // mostrar resultados
+        let filtro1 = String(req.params.fecha)
+        ModificationDB.find(query)
+          .skip(saltar)
+          .limit(pagination)
+          .populate('employe')
+          .populate('products.product_data')
+          .exec((err, sells) => {
+          console.log('ventas: ',sells)
+          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1})
+        })
+      })
+    } else {
+      res.redirect("/")
+    }
+  });
+
   // vender (paginacion)
   app.get("/sell/:saltar", (req, res) => {
     if(req.session._id){
@@ -457,7 +522,8 @@ mongo.connect(url, {
     })
     // guardar venta
     let dataPost = {}
-    dataPost.date = "" + moment().format('MM/DD/YYYY, h:mm:ss a')
+    dataPost.date = "" + moment().format('MM-DD-YYYY')
+    dataPost.employe = mongoose.Types.ObjectId(req.session._id),
     dataPost.total = 0
     dataPost.products = []
     req.body.data.forEach((element, index) => {
