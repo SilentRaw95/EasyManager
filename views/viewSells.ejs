@@ -81,20 +81,11 @@
   <script>
     $(document).ready(function(){
       $("#buscar").click(function(){
-        let name = $("#nameproduct").val();
-        let categoria = $("#categoria").val();
+        let date = $("#date").val();
 
-        if(name != '' && categoria == ''){
+        if(date != ''){
           // solo nombre
-          window.location.href = 'http://localhost:3000/viewSells/0/'+name+'/null'
-        } else if(name == '' && categoria != ''){
-          // solo categoria
-          window.location.href = 'http://localhost:3000/viewSells/0/null/'+categoria
-        } else if(name != '' && categoria != '') {
-          // ambas
-          window.location.href = 'http://localhost:3000/viewSells/0/'+name+'/'+categoria
-        } else {
-          window.location.href = 'http://localhost:3000/viewSells/0/'
+          window.location.href = 'http://localhost:3000/viewSells/0/'+date
         }
       })
     })

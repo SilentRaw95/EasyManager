@@ -345,7 +345,7 @@ mongo.connect(url, {
 
         // mostrar resultados
         let filtro1 = String(req.params.fecha)
-        ModificationDB.find(query)
+        Sells_SchemaDB.find(query)
           .skip(saltar)
           .limit(pagination)
           .populate('employe')
@@ -510,14 +510,13 @@ mongo.connect(url, {
     // reducir stock
     req.body.data.forEach(item => {
       const collection = db.collection('products')
-      var temp_id = mongoose.Types.ObjectId(item.product_id)
-      collection.findOneAndUpdate({_id: temp_id}, {$inc:{ stock: -item.quantity }} )
-      .then((docs)=>{
-        console.log('ook')
-      })
-      .catch((err)=>{
-        console.log(err)
-        return res.end("error")
+      var temp_id = mongoose.Types.ObjectId(item.product_data)
+      collection.findOneAndUpdate({_id: temp_id}, {$inc:{ stock: -parseInt(item.quantity) }}, {new: true}, (err, doc) => {
+        if (err) {
+          console.log("Something wrong when updating data! ",err);
+        }
+        console.log('id: ', temp_id)
+        console.log(doc);
       })
     })
     // guardar venta
