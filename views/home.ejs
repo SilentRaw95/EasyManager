@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Easy Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="css/base.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.min.js"></script>
+  </head>
+  <body>
+    <!-- Navegacion -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">Easy Manager</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador' ||
+            role == 'almacen' ) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/addProduct/0">Productos</a>
+            </li>
+          <% } %>
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/addUser/0">Usuarios</a>
+            </li>
+          <% } %> 
+          <% if (role == 'empleado') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/sells/0">Vender</a>
+            </li>
+          <% } %> 
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/viewSells/0">Ventas</a>
+            </li>
+          <% } %>
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador' ||
+            role == 'almacen' ) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/seeModifications/0">Modificaciones</a>
+            </li>
+          <% } %>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/logout">Cerrar session</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="contenedor espacio">
+      <p>Bienvenido</p>
+    </div>
+  </body>
+</html>

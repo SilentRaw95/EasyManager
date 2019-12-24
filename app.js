@@ -89,7 +89,7 @@ mongo.connect(url, {
   // pagina de inicio (con session)
   app.get("/home", (req, res) => {
     if(req.session._id){
-      res.sendFile(__dirname + "/views/home.html");
+      res.render(__dirname + "/views/home.ejs", {role: req.session.role});
     } else {
       res.redirect("/")
     }
@@ -97,7 +97,10 @@ mongo.connect(url, {
 
   // add user (paginacion)
   app.get("/addUser/:saltar", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador' ||
+      req.session.role == 'almacen')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -111,7 +114,7 @@ mongo.connect(url, {
         // mostrar resultados
         const collection = db.collection('users')
         collection.find({}).skip(saltar).limit(pagination).toArray((err, users) => {
-          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1})
+          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1, role: req.session.role})
         })
       })
     } else {
@@ -121,7 +124,10 @@ mongo.connect(url, {
 
   // add user (paginacion y filtros)
   app.get("/addUser/:saltar/:nombre", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador' ||
+      req.session.role == 'almacen')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -140,7 +146,7 @@ mongo.connect(url, {
         collection.find({
           first_name: {$regex: ".*" + nombre + ".*"}
         }).skip(saltar).limit(pagination).toArray((err, users) => {
-          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1})
+          res.render(__dirname + "/views/addUser.ejs", {users, totalResults, filtro1, role: req.session.role})
         })
       })
     } else {
@@ -150,7 +156,9 @@ mongo.connect(url, {
 
   // add product (paginacion)
   app.get("/addProduct/:saltar", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -165,7 +173,7 @@ mongo.connect(url, {
         // mostrar resultados
         const collection = db.collection('products')
         collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
-          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -175,7 +183,9 @@ mongo.connect(url, {
 
   // add product (paginacion y filtros)
   app.get("/addProduct/:saltar/:nombre/:categoria", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -209,7 +219,7 @@ mongo.connect(url, {
         let filtro2 = String(req.params.categoria)
         const collection = db.collection('products')
         collection.find(query).skip(saltar).limit(pagination).toArray((err, products) => {
-          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/addProduct.ejs", {products, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -219,7 +229,10 @@ mongo.connect(url, {
 
   // ver modificaciones (paginacion)
   app.get("/seeModifications/:saltar", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador' ||
+      req.session.role == 'almacen')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -239,7 +252,7 @@ mongo.connect(url, {
           .populate('employe')
           .exec((err, modif) => {
           console.log('modifs: ',modif)
-          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -249,7 +262,10 @@ mongo.connect(url, {
 
   // ver modificaciones (paginacion y busqueda)
   app.get("/seeModifications/:saltar/:nombre/:categoria", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador' ||
+      req.session.role == 'almacen')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -288,7 +304,7 @@ mongo.connect(url, {
           .populate('employe')
           .exec((err, modif) => {
           console.log('modifs search: ',modif)
-          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/modifications.ejs", {modif, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -298,7 +314,9 @@ mongo.connect(url, {
 
   // ver ventas (paginacion)
   app.get("/viewSells/:saltar", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -317,7 +335,7 @@ mongo.connect(url, {
           .populate('products.product_data')
           .exec((err, sells) => {
           console.log('ventas: ',sells)
-          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1})
+          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1, role: req.session.role})
         })
       })
     } else {
@@ -327,7 +345,9 @@ mongo.connect(url, {
 
   // ver ventas (paginacion y busqueda)
   app.get("/viewSells/:saltar/:fecha", (req, res) => {
-    if(req.session._id){
+    if (req.session._id &&
+      (req.session.role == 'administrador' ||
+      req.session.role == 'sub_administrador')){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -352,7 +372,7 @@ mongo.connect(url, {
           .populate('products.product_data')
           .exec((err, sells) => {
           console.log('ventas: ',sells)
-          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1})
+          res.render(__dirname + "/views/viewSells.ejs", {sells, totalResults, filtro1, role: req.session.role})
         })
       })
     } else {
@@ -362,7 +382,7 @@ mongo.connect(url, {
 
   // vender (paginacion)
   app.get("/sell/:saltar", (req, res) => {
-    if(req.session._id){
+    if (req.session._id && req.session.role == 'empleado'){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -377,7 +397,7 @@ mongo.connect(url, {
         // mostrar resultados
         const collection = db.collection('products')
         collection.find({}).skip(saltar).limit(pagination).toArray((err, products) => {
-          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -387,7 +407,7 @@ mongo.connect(url, {
 
   // vender (paginacion y filtros)
   app.get("/sell/:saltar/:nombre/:categoria", (req, res) => {
-    if(req.session._id){
+    if (req.session._id && req.session.role == 'empleado'){
       // valores
       let pagination = 5
       let saltar = parseInt(req.params.saltar)
@@ -421,7 +441,7 @@ mongo.connect(url, {
         let filtro2 = String(req.params.categoria)
         const collection = db.collection('products')
         collection.find(query).skip(saltar).limit(pagination).toArray((err, products) => {
-          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2})
+          res.render(__dirname + "/views/sell.ejs", {products, totalResults, filtro1, filtro2, role: req.session.role})
         })
       })
     } else {
@@ -564,6 +584,12 @@ mongo.connect(url, {
         console.log(err)
         return res.end("error")
       })
+  });
+
+  app.get("/logout", (req, res) => {
+    req.session._id = null;
+    req.session.role = null;
+    res.redirect("/")
   });
 
   // logs

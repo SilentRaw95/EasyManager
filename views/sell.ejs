@@ -14,6 +14,49 @@
   </head>
 
   <body>
+    <!-- Navegacion -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">Easy Manager</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador' ||
+            role == 'almacen' ) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/addProduct/0">Productos</a>
+            </li>
+          <% } %>
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/addUser/0">Usuarios</a>
+            </li>
+          <% } %> 
+          <% if (role == 'empleado') { %>
+            <li class="nav-item active">
+              <a class="nav-link" href="http://localhost:3000/sells/0">Vender</a>
+            </li>
+          <% } %> 
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador') { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/viewSells/0">Ventas</a>
+            </li>
+          <% } %>
+          <% if (role == 'administrador' ||
+            role == 'sub_administrador' ||
+            role == 'almacen' ) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3000/seeModifications/0">Modificaciones</a>
+            </li>
+          <% } %>
+          <li class="nav-item">
+            <a class="nav-link" href="http://localhost:3000/logout">Cerrar session</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
     <div class="contenedor espacio">
       <!--Busqueda-->
       <form>
